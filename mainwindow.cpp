@@ -17,7 +17,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_pressed()
 {
-    QMessageBox::information(this, "Info", "Submit button has been pressed");
+    const auto& tmp = ui->lineEdit->text();
+
+    if(QString("") == tmp){
+        QMessageBox::information(this, "Error", "No prompt provided");
+    }
+    else{
+        QMessageBox::information(this, "Info", "Starting new thread with your prompt");
+    }
 }
 
 
@@ -29,6 +36,5 @@ void MainWindow::on_pushButton_2_pressed()
 
 void MainWindow::on_pushButton_3_pressed()
 {
-    QMessageBox::information(this, "Info", "Analysis button has been pressed");
+    // QMessageBox::information(this, "Info", ui->textEdit1->toPlainText());
 }
-
