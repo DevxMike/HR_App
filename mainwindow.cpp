@@ -5,6 +5,8 @@
 #include <vector>
 #include <fstream>
 #include <qinputdialog.h>
+#include <QtPrintSupport/qprinter.h>
+#include <string>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -51,41 +53,61 @@ void MainWindow::on_pushButton_2_pressed()
             ui->textEdit1_4->toPlainText()
         };
 
-        std::ofstream htmlFile(fname.toStdString());
+        std::ofstream htmlFile(fname.toStdString() + ".html");
 
         if(htmlFile.is_open()){
-            htmlFile << "<!DOCTYPE html>\n";
-            htmlFile << "<html>\n";
-            htmlFile << "<head>\n";
-            htmlFile << "<title>Table with offer</title>\n";
-            htmlFile << "<style>\n";
-            htmlFile << "body { width: 21cm; margin: 0 auto; }\n"; // Set the width of the body to match A4
-            htmlFile << "table { width: 100%; border-collapse: collapse; height: 29.7cm; }\n"; // Set the height of the entire table
-            htmlFile << "td { border: 1px solid black; padding: 8px; }\n";
-            htmlFile << "</style>\n";
-            htmlFile << "</head>\n";
-            htmlFile << "<body>\n";
-            htmlFile << "<table>\n"; // No need for border=\"1\" if you are using CSS for styling
-
-
+            std::string html_content = "";
+            html_content += "<!DOCTYPE html>\n";
+            html_content += "<html>\n";
+            html_content += "<head>\n";
+            html_content += "<title>Table with offer</title>\n";
+            html_content += "<style>\n";
+            html_content += "body { width: 21cm; margin: 0 auto; }\n"; // Set the width of the body to match A4
+            html_content += "table { width: 100%; border-collapse: collapse; height: 29.7cm; }\n"; // Set the height of the entire table
+            html_content += "td { border: 1px solid black; padding: 8px; }\n";
+            html_content += "</style>\n";
+            html_content += "</head>\n";
+            html_content += "<body>\n";
+            html_content += "<table>\n"; // No need for border=\"1\" if you are using CSS for styling
 
             for(const auto& s : text_content){
-                htmlFile << "<tr>\n";
-                htmlFile << "<td>" << s.toStdString() << "</td>\n";
-                htmlFile << "</tr>\n";
+                html_content += "<tr>\n";
+                html_content += "<td>" + s.toStdString() + "</td>\n";
+                html_content += "</tr>\n";
             }
 
-            htmlFile << "</table>\n";
-            htmlFile << "</body>\n";
-            htmlFile << "</html>\n";
+            html_content += "</table>\n";
+            html_content += "</body>\n";
+            html_content += "</html>\n";
 
+            htmlFile << html_content;
             htmlFile.close();
+
+            QMessageBox msgBox;
+            msgBox.setText("Do you want to create a PDF file?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::No);
+
+            if(msgBox.exec() == QMessageBox::Yes){
+                QMessageBox::information(this, "Info", "Saving to PDF");
+                QTextDocument document;
+                QPrinter printer;
+
+                document.setHtml(QString::fromStdString(html_content));
+
+                printer.setOutputFormat(QPrinter::PdfFormat);
+                printer.setOutputFileName(fname + ".pdf");
+
+                document.setPageSize(QSizeF(210, 297));
+                document.setDocumentMargin(0);
+
+                document.print(&printer);
+            }
         }
         else{
             QMessageBox::information(this, "Error", "Could not open the file!");
         }
     }
-    // std::ofstream html_output("")
 }
 
 
